@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		
+		body{
+		
+			background-color: #aaa;
+		}
+		#outter{
+			border-top: solid #eee 0.1px;
+			background: linear-gradient(#eee, #eee 96%, rgba(0,0,0,0.5));
+			/*background: linear-gradient(135deg, #eee, #eee 96%, rgba(0,0,0,0.5));*/
+			margin: 0 auto;
+			display: block;
+			height: 500px;
+			width: 400px;
+			max-width: 100%;
+			text-align: center;
+			border-radius: 5%;
+			box-shadow: inset 2px 3px 3px 2px rgba(0,0,0,0.5),
+						2px 2px 2px 2px rgba(0,0,0,0.5);
+			font-size: 20px;
+		}
+		#inner{
+			padding: 2em;
+		}
+		#name{
+			
+		}
+		#screen-box{
+			margin: 1em 0 1em 0;
+			height: 50px;
+			background-color: #DDF47F;
+			border:solid grey 1px;
+			border-radius: 5%;
+			box-shadow: inset 1px 2px 2px 1px rgba(0,0,0,0.5);
+			text-align: right;
+			padding:.25em 1em .25em 1em;
+		}
+		#screen{
+			font-size: 30px;
+		}
+		#inner-screen{
+			font-size: 15px;
+		}
+		#buttons{
+
+		}
+		#button0{
+			width: 50%;
+			max-width:50%;
+		}
+		#buttonLast{
+			width: 50%;
+			max-width:50%;
+		}
+		.button-row{
+			max-width: 100%;
+			display: flex;
+			margin: 0.5em 0 0.5em 0;
+			min-height: 25%;
+		}
+		.button{
+			color: white;
+			line-height: 50px;
+			max-width: 25%;
+			width: 25%;
+			margin: 0 0.5em 0 0.5em;
+			height: 50px;
+			background: linear-gradient(#616161, #616161 90%, rgba(0,0,0,0.5));
+			border-radius: 10%;
+			box-shadow: 1px 2px black;
+		}
+		.button:active{
+			transform: translateY(3px);
+			box-shadow: none;
+			background: #616161;
+		}
+		.button-red{
+			background: linear-gradient(red, red 90%, rgba(250,0,0,0.5));
+		}
+		.button-red:active{
+			transform: translateY(3px);
+			box-shadow: none;
+			background: red;
+		}
+	</style>
+</head>
+<body>
+<div id="outter">
+	<div id="inner">
+		<div id="name">ELECTRONIC CALCULATOR</div>
+		<div id="screen-box">
+			<div id="screen">0</div>
+			<div id="inner-screen"></div>
+		</div>
+		<div id="buttons">
+			<div class="button-row">
+				<div class="button button-red" id="ac">AC</div>
+				<div class="button button-red" id="ce">CE</div>
+				<div class="button button-math">/</div>
+				<div class="button button-math">*</div>
+			</div>
+			<div class="button-row">
+				<div class="button button-num">7</div>
+				<div class="button button-num">8</div>
+				<div class="button button-num">9</div>
+				<div class="button button-math">-</div>
+			</div>
+			<div class="button-row">
+				<div class="button button-num">4</div>
+				<div class="button button-num">5</div>
+				<div class="button button-num">6</div>
+				<div class="button button-math">+</div>
+			</div>
+			<div class="button-row">
+				<div class="button button-num">1</div>
+				<div class="button button-num">2</div>
+				<div class="button button-num">3</div>
+				<div class="button button-num">.</div>
+			</div>
+			<div class="button-row">
+				<div id="button0" class="button button-num">0</div>
+				<div id="buttonLast" class="button button-math">=</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	//booleans to check for which button was last clicked
+	var decimalUsed=false;
+	var equalsLast=false;
+	var mathClick=false;
+	//variables to store inputs and answers
+	var holder="";
+	var answer=[];
+	var arr=[];
+	//select elements from HTML
+	var screen=document.querySelector("#screen");
+	var innerScreen=document.querySelector("#inner-screen");
+	//function to clear all varibles and start at zero
+	var ac=document.querySelector("#ac");
+	ac.onclick=clickAC;
+	function clickAC(){
+		decimalUsed=false;
+		arr=[];
+		innerScreen.textContent='';
+		screen.textContent=0;
+		holder="";
+	}
+	//function to clear the holder variable with the most recent inputs
+	var ce=document.querySelector("#ce");
+	ce.onclick=clickCE;
+	function clickCE(){
+		decimalUsed=false;
+		innerScreen.textContent=arr.join("");
+		screen.textContent=0;
+		holder="";
+	}
+	//sets the onclick property of all the numbered buttons to execute function clickNum
+	var buttonsNum=document.querySelectorAll(".button-num");
+	for (var i = 0; i < buttonsNum.length; i++) {
+		buttonsNum[i].onclick=clickNum;
+	}
+	//sets the onclick property of all the math buttons to execute function clickMath
+	var buttonsMath=document.querySelectorAll(".button-math");
+	for (var i = 0; i < buttonsMath.length; i++) {
+		buttonsMath[i].onclick=clickMath;
+	}	
+	//function for when the Num buttons are clicked.
+	function clickNum(e) {
+		//if equals was the last button pressed clear the answers array and bottom screen, basically start over
+		if (equalsLast) {
+			innerScreen.textContent="";
+			arr=[];
+		}
+		//places a 0 infront of the decimal if the input is 0, also prevents the decimal from being used twice
+		if (e.target.textContent==".") {
+			if(!decimalUsed){
+				if (screen.textContent==0||equalsLast||mathClick) {
+					innerScreen.textContent+="0"+e.target.textContent;
+					console.log(innerScreen.textContent);
+					holder+="0"+e.target.textContent;
+					screen.textContent=holder;
+				} else if (screen.textContent!==0) {
+					innerScreen.textContent+=e.target.textContent;
+					holder+=e.target.textContent;
+					screen.textContent=holder;
+				}
+			}
+			decimalUsed=true; 
+		}else{
+			//prevents 0 from being used if 0 is the first input
+			if (screen.textContent=="0") {
+				if (e.target.textContent!=="0") {
+					innerScreen.textContent+=e.target.textContent;
+					holder+=e.target.textContent;
+					screen.textContent=holder;
+				}
+			} else{
+				//standard function for placing numbers builds the bottom screen with each input and builds a holder that will be
+				//pushed to an array when a Math button is pressed.
+					innerScreen.textContent+=e.target.textContent;
+					console.log(innerScreen.textContent);
+					holder+=e.target.textContent;
+					screen.textContent=holder;
+					
+			}
+		}//changes booleans to show that neither the equals button or a math button was the last button clicked
+			equalsLast=false;
+			mathClick=false;
+	}
+	//function for clicking a math or equals button
+function clickMath(e) {
+	//this if statement prevents inputing multiple math operators in a row
+	if (!mathClick) {
+		//starts function for equals only can start if the input array already has two values
+		if (e.target.textContent=="=") {
+			if (arr.length>=2) {
+				//booleans to determine which buttons were last used
+				decimalUsed=false;
+				equalsLast=true;
+				//pushes the latest input into the array to be calculated. must have at least three to do a calculation
+				arr.push(holder);
+				//function for doing the math on the inputs that have been stored in the array.
+				function solve(){
+					//loop through all of the array
+					for(var i=0;i<arr.length;i++){
+						//look for operator signs
+						if (arr[i]=="+") {
+							//calculate the input before and after the operator. use the Number() constructor to change from 
+							//string to number.
+							answer.push(Number(arr[i-1])+Number(arr[i+1],));
+							//show the answer on the screen
+							screen.textContent=answer[0];
+							//show the inputs and answer on the lower screen
+							innerScreen.textContent=arr.join("")+" = "+answer[0];
+							//replace the inputs that have been calcuated with the answer in the array.  
+							arr.splice(i-1,3,answer[0]);
+							//clear the holder and answer varibles
+							holder="";
+							answer=[];
+							//run again if there are still more calculations to be done.
+							if (arr.length>=2) {
+								solve();
+							}
+							//same process for the -,*, and / operators
+						}else if (arr[i]=="-") {
+							answer.push(Number(arr[i-1])-Number(arr[i+1],));
+							screen.textContent=answer[0];
+							innerScreen.textContent=arr.join("")+" = "+answer[0];
+							arr.splice(i-1,3,answer[0])
+							holder="";
+							answer=[];
+							if (arr.length>=2) {
+								solve();
+							}
+						}else if (arr[i]=="*") {
+							answer.push(Number(arr[i-1])*Number(arr[i+1],));
+							screen.textContent=answer[0];
+							innerScreen.textContent=arr.join("")+" = "+answer[0];
+							arr.splice(i-1,3,answer[0]);
+							holder="";;
+							answer=[];
+							if (arr.length>=2) {
+								solve();
+							}
+						}else if (arr[i]=="/") {
+							answer.push(Number(arr[i-1])/Number(arr[i+1],));
+							screen.textContent=answer[0];
+							innerScreen.textContent=arr.join("")+" = "+answer[0];
+							arr.splice(i-1,3,answer[0])
+							holder="";
+							answer=[];
+							if (arr.length>=2) {
+								solve();
+							}
+						}
+					}
+				}
+				//call solve() to get it started
+				solve();
+			}
+			//function for the other math operators apart from equals
+		}else{
+			//push the inputs for the screen to the array
+			if (holder) {
+					arr.push(holder);
+				}
+				//arr must have at least one input to avoid starting with an operator
+			if (arr.length>0) {
+				//clean up the inner screen equals was the last button pressed
+				if (equalsLast) {
+					innerScreen.textContent=arr.join("");
+				}
+				//change booleans to show last button pressed
+				equalsLast=false;
+				mathClick=true;
+				decimalUsed=false;
+				//show the operator on the top and bottom screens
+				innerScreen.textContent+=e.target.textContent;
+				screen.textContent=e.target.textContent;
+				//clear the holder var and push the operator to the array 
+				holder="";
+				arr.push(e.target.textContent);
+				}
+			}
+		}
+	}
+
+
+</script>
+</body>
+</html>
